@@ -1,0 +1,51 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Customer {
+  id                String   @id @default(cuid())
+  company           String?
+  vatNumber         String?  @map("vat_number")
+  phone             String?
+  website           String?
+  group             String?  // High Budget, Low Budget, VIP, Wholesaler
+  currency          String?  @default("EUR")
+  defaultLanguage   String?  @default("en") @map("default_language")
+  
+  // Customer Details Address
+  address           String?
+  city              String?
+  state             String?
+  zipCode           String?  @map("zip_code")
+  country           String?
+  
+  // Billing Address
+  billingStreet     String?  @map("billing_street")
+  billingCity       String?  @map("billing_city")
+  billingState      String?  @map("billing_state")
+  billingZipCode    String?  @map("billing_zip_code")
+  billingCountry    String?  @map("billing_country")
+  sameAsCustomerInfo Boolean @default(false) @map("same_as_customer_info")
+  
+  // Shipping Address
+  shippingStreet    String?  @map("shipping_street")
+  shippingCity      String?  @map("shipping_city")
+  shippingState     String?  @map("shipping_state")
+  shippingZipCode   String?  @map("shipping_zip_code")
+  shippingCountry   String?  @map("shipping_country")
+  copyBillingAddress Boolean @default(false) @map("copy_billing_address")
+  
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  @@map("customers")
+}
+

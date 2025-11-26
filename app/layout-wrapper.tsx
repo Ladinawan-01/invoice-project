@@ -3,9 +3,8 @@
 import { useState, useEffect } from "react"
 import Sidebar from "@/components/sidebar"
 import InvoiceHeader from "@/components/invoice-header"
-import DashboardPage from "./dashboard/page"
 
-export default function Home() {
+export default function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(true)
 
   // On mobile, sidebar should be closed by default
@@ -43,8 +42,9 @@ export default function Home() {
         sidebarOpen ? "lg:ml-64 ml-0" : "ml-0"
       }`}>
         <InvoiceHeader onMenuClick={toggleSidebar} sidebarOpen={sidebarOpen} />
-        <DashboardPage />
+        {children}
       </main>
     </div>
   )
 }
+

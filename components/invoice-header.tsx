@@ -40,10 +40,7 @@ export default function InvoiceHeader({ onMenuClick, sidebarOpen = false }: Invo
             <Menu size={20} />
           </span>
         </button>
-        <div className="flex items-center gap-2">
-          <span className="text-gray-600 text-sm hidden sm:inline">Invoice Details</span>
-          <span className="text-gray-600 text-xs sm:hidden">Invoice</span>
-        </div>
+    
       </div>
 
       {/* Right: Icons and User */}
