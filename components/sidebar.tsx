@@ -28,9 +28,17 @@ export default function Sidebar({ isOpen }: SidebarProps) {
       {/* Header with Logo */}
       <div className="p-4 border-gray-200">
         <div className="flex items-center gap-2">
-          {/* Logo image */}
-          <img src="/logo.png" alt="Logo" width={350} height={350} className="object-contain" />
-         </div>
+          {/* Inline Sisyphus logo with text */}
+          <svg width="36" height="36" viewBox="0 0 40 40" fill="none" className="object-contain" xmlns="http://www.w3.org/2000/svg">
+            <g>
+              <rect width="40" height="40" fill="white" fillOpacity="0" />
+              <path d="M10 7.5L22.5 7.5V12.5H15L10 17.5V7.5Z" fill="#34D399"/>
+              <path d="M30 15L17.5 15V20H25L30 25V15Z" fill="#10B981"/>
+              <path d="M10 22.5L22.5 22.5L10 35V22.5Z" fill="#34D399"/>
+            </g>
+          </svg>
+          <span className="text-2xl font-semibold tracking-tight text-gray-900 select-none">Sisyphus</span>
+        </div>
       </div>
       {/* Navigation */}
       <nav className="flex-1 px-3 py-3 space-y-0.5">
