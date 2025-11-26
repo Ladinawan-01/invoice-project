@@ -5,9 +5,10 @@ import { ChevronDown, LayoutDashboard, FileText, Package, Users, ClipboardList, 
 
 interface SidebarProps {
   isOpen: boolean
+  onClose?: () => void
 }
 
-export default function Sidebar({ isOpen }: SidebarProps) {
+export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const [expandedSections, setExpandedSections] = useState({
     billing: true,
     management: false,
@@ -23,7 +24,7 @@ export default function Sidebar({ isOpen }: SidebarProps) {
 
   return (
     <aside className={`bg-white border-r border-gray-200 flex flex-col fixed left-0 top-0 h-screen z-50 transition-all duration-300 ease-in-out ${
-      isOpen ? "w-64" : "w-0 overflow-hidden"
+      isOpen ? "w-64 lg:w-64" : "w-0 lg:w-0 overflow-hidden"
     }`}>
       {/* Header with Logo */}
       <div className="p-4 border-gray-200">

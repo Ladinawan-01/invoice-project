@@ -1,7 +1,7 @@
 export default function InvoiceDetailsTable() {
   return (
-    <div className="space-y-8">
-      <div className="grid grid-cols-2 gap-12">
+    <div className="space-y-6 sm:space-y-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-12">
         {/* Left Column - Dates */}
         <div className="space-y-6">
           <div>

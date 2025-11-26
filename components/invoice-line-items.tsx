@@ -36,8 +36,10 @@ export default function InvoiceLineItems() {
   ]
 
   return (
-    <div>
-      <table className="w-full text-sm">
+    <div className="overflow-x-auto -mx-4 sm:mx-0">
+      <div className="inline-block min-w-full align-middle">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm min-w-[800px]">
         <thead>
           <tr className="border-t border-b border-gray-300 bg-gray-100">
             <th className="text-left py-3 px-4 font-semibold text-gray-700 text-xs">NO.</th>
@@ -66,6 +68,8 @@ export default function InvoiceLineItems() {
           ))}
         </tbody>
       </table>
+        </div>
+      </div>
 
       {/* Totals */}
       <div className="mt-6 text-sm border-t border-gray-300 pt-4 space-y-2">
