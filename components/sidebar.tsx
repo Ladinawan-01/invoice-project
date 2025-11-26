@@ -58,15 +58,15 @@ export default function Sidebar({ isOpen }: SidebarProps) {
           {expandedSections.billing && (
             <div className="ml-6 mt-1 space-y-0.5">
               <button className="w-full bg-teal-500 text-white py-1 px-2 rounded text-sm mb-0.5 hover:bg-teal-600 transition flex items-center gap-1.5">
-                <FileText size={14} className="text-white" />
+                
                 <span>Quotes & Invoices</span>
               </button>
               <div className="pl-1 flex items-center gap-1.5 py-0.5 text-gray-500 text-sm hover:text-gray-900 cursor-pointer">
-                <Package size={14} className="text-gray-400" />
+                
                 <span>Products & Services</span>
               </div>
               <div className="pl-1 flex items-center gap-1.5 py-0.5 text-gray-500 text-sm hover:text-gray-900 cursor-pointer">
-                <Users size={14} className="text-gray-400" />
+                 
                 <span>Clients</span>
               </div>
             </div>
