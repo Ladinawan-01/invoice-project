@@ -49,3 +49,43 @@ model Customer {
   @@map("customers")
 }
 
+model Invoice {
+  id                     String   @id @default(uuid())
+  customerName           String?  @map("customer_name")
+  customerEmail          String?  @map("customer_email")
+  billToAddress          String?  @map("bill_to_address")
+  billToCity             String?  @map("bill_to_city")
+  billToState            String?  @map("bill_to_state")
+  billToCountry          String?  @map("bill_to_country")
+  shipToName             String?  @map("ship_to_name")
+  shipToAddress          String?  @map("ship_to_address")
+  shipToCity             String?  @map("ship_to_city")
+  shipToState            String?  @map("ship_to_state")
+  shipToCountry          String?  @map("ship_to_country")
+  invoiceNumber          String   @map("invoice_number")
+  invoiceDate            DateTime @map("invoice_date")
+  dueDate                DateTime @map("due_date")
+  preventOverdueReminders Boolean  @default(false) @map("prevent_overdue_reminders")
+  tags                   Json?
+  paymentModes           Json?    @map("payment_modes")
+  currency               String
+  saleAgent              String?  @map("sale_agent")
+  isRecurring            Boolean  @default(false) @map("is_recurring")
+  discountType           String   @map("discount_type")
+  discountValue          Float    @map("discount_value")
+  adminNote              String?  @map("admin_note")
+  quantityDisplay        String   @map("quantity_display")
+  adjustment             Float    @default(0)
+  lineItems              Json     @map("line_items")
+  clientNote             String?  @map("client_note")
+  terms                  String?
+  subtotal               Float
+  discountAmount         Float    @map("discount_amount")
+  taxAmount              Float    @map("tax_amount")
+  total                  Float
+  createdAt              DateTime @default(now()) @map("created_at")
+  updatedAt              DateTime @updatedAt @map("updated_at")
+
+  @@map("invoices")
+}
+

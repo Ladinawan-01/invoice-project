@@ -19,6 +19,11 @@ export const navigationItems: NavItem[] = [
     href: "/customers",
     icon: Building2,
   },
+  {
+    label: "Invoices",
+    href: "/invoices",
+    icon: FileText,
+  },
   // Add more pages here as you create them
   // {
   //   label: "Invoices",

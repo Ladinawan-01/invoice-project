@@ -41,9 +41,9 @@ export default function RootLayout({
     <html lang="en">
       <body className={`font-sans antialiased`}>
         <AuthProvider>
-          {children}
+        {children}
           <Toaster />
-          <Analytics />
+        <Analytics />
         </AuthProvider>
       </body>
     </html>
