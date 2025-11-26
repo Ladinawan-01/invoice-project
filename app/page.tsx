@@ -10,7 +10,7 @@ export default function Home() {
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen)
-  }
+  } 
 
   return (
     <div className="flex min-h-screen bg-gray-50">
