@@ -37,7 +37,16 @@ type Invoice = {
   total: number
   clientNote?: string
   terms?: string
+  termsOfPayment?: string
   createdAt: string
+  // Company Information
+  companyName?: string
+  companyContactPerson?: string
+  companyAddress?: string
+  companyPhone?: string
+  companyEmail?: string
+  companySiret?: string
+  companyVat?: string
 }
 
 export default function InvoiceViewPage({ params }: { params: Promise<{ id: string }> }) {

@@ -8,6 +8,7 @@ type Invoice = {
   billToState?: string
   billToCountry?: string
   clientNote?: string
+  termsOfPayment?: string
 }
 
 export default function InvoiceDetailsTable({ 
@@ -32,7 +33,7 @@ export default function InvoiceDetailsTable({
           </div>
           <div>
             <p className="text-xs font-semibold text-gray-500 uppercase mb-1">Terms of Payment</p>
-            <p className="text-gray-900 font-medium">N/A</p>
+            <p className="text-gray-900 font-medium">{invoice.termsOfPayment || "N/A"}</p>
           </div>
           <div>
             <p className="text-xs font-semibold text-gray-500 uppercase mb-1">Payment Deadline</p>
@@ -53,9 +54,6 @@ export default function InvoiceDetailsTable({
                   .join(", ") || "N/A"}
                 {invoice.billToCountry && `, ${invoice.billToCountry}`}
               </p>
-              {invoice.customerEmail && <p>{invoice.customerEmail}</p>}
-              <p>SIRET: N/A</p>
-              <p>VAT: N/A</p>
             </div>
           </div>
         </div>

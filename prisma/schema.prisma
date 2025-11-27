@@ -79,6 +79,15 @@ model Invoice {
   lineItems              Json     @map("line_items")
   clientNote             String?  @map("client_note")
   terms                  String?
+  termsOfPayment         String?  @map("terms_of_payment")
+  // Company Information
+  companyName            String?  @map("company_name")
+  companyContactPerson   String?  @map("company_contact_person")
+  companyAddress         String?  @map("company_address")
+  companyPhone           String?  @map("company_phone")
+  companyEmail           String?  @map("company_email")
+  companySiret           String?  @map("company_siret")
+  companyVat             String?  @map("company_vat")
   subtotal               Float
   discountAmount         Float    @map("discount_amount")
   taxAmount              Float    @map("tax_amount")

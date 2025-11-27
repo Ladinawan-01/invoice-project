@@ -28,7 +28,16 @@ type Invoice = {
   total: number
   clientNote?: string
   terms?: string
+  termsOfPayment?: string
   createdAt: string
+  // Company Information
+  companyName?: string
+  companyContactPerson?: string
+  companyAddress?: string
+  companyPhone?: string
+  companyEmail?: string
+  companySiret?: string
+  companyVat?: string
 }
 
 const formatDate = (dateString?: string) => {
@@ -50,7 +59,7 @@ const formatCurrency = (amount: number, currency: string = "USD") => {
 }
 
 export default function InvoiceContent({ invoice }: { invoice: Invoice }) {
-  const companyName = "Sisyphus"
+  const companyName = invoice.companyName || "Sisyphus"
   const companyInitial = companyName.charAt(0).toUpperCase()
 
   return (
@@ -68,7 +77,7 @@ export default function InvoiceContent({ invoice }: { invoice: Invoice }) {
           </div>
 
           {/* Right: Action Buttons */}
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-2 flex-wrap no-print">
             <button className="border border-gray-300 text-gray-600 py-1.5 px-2 sm:px-3 rounded text-xs hover:bg-gray-50 flex items-center gap-1.5">
               <span className="hidden sm:inline">More Options</span>
               <span className="sm:hidden">Options</span>
@@ -97,11 +106,21 @@ export default function InvoiceContent({ invoice }: { invoice: Invoice }) {
             <div className="flex-1 w-full">
               <p className="text-xs font-bold text-gray-500 uppercase mb-1.5">{companyName}</p>
               <div className="text-xs text-gray-900 space-y-0.5">
-                <p className="font-medium">N/A</p>
-                <p className="break-words">N/A</p>
-                <p className="break-all">N/A</p>
-                <p>SIRET: N/A</p>
-                <p>VAT: N/A</p>
+                {invoice.companyContactPerson && (
+                  <p className="font-medium">{invoice.companyContactPerson}</p>
+                )}
+                {invoice.companyAddress && (
+                  <p className="break-words">{invoice.companyAddress}</p>
+                )}
+                {(invoice.companyPhone || invoice.companyEmail) && (
+                  <p className="break-all">
+                    {invoice.companyPhone || ""}
+                    {invoice.companyPhone && invoice.companyEmail && " | "}
+                    {invoice.companyEmail || ""}
+                  </p>
+                )}
+                {invoice.companySiret && <p>SIRET: {invoice.companySiret}</p>}
+                {invoice.companyVat && <p>VAT: {invoice.companyVat}</p>}
               </div>
               <div className="mt-3">
                 <p className="text-xs text-gray-500">#{invoice.invoiceNumber || "N/A"}</p>
@@ -139,7 +158,7 @@ export default function InvoiceContent({ invoice }: { invoice: Invoice }) {
         </div>
 
         {/* Right Section - Summary */}
-        <div className="col-span-1 lg:col-span-1">
+        <div className="col-span-1 lg:col-span-1 no-print">
           <InvoiceSummary invoice={invoice} formatCurrency={formatCurrency} formatDate={formatDate} />
         </div>
       </div>

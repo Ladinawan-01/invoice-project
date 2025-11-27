@@ -23,19 +23,19 @@ export default function InvoiceLineItems({
   const items = invoice.lineItems || []
 
   return (
-    <div className="overflow-x-auto -mx-4 sm:mx-0">
-      <div className="inline-block min-w-full align-middle">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm min-w-[800px]">
+    <div className="overflow-x-auto -mx-4 sm:mx-0 print:overflow-visible print:mx-0">
+      <div className="inline-block min-w-full align-middle print:block">
+        <div className="overflow-x-auto print:overflow-visible">
+          <table className="w-full text-sm min-w-[800px] print:min-w-full print:text-xs">
             <thead>
               <tr className="border-t border-b border-gray-300 bg-gray-100">
-                <th className="text-left py-3 px-4 font-semibold text-gray-700 text-xs">NO.</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700 text-xs">ARTICLE</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700 text-xs">QUANTITY</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700 text-xs">UNIT PRICE</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700 text-xs">VAT</th>
-                <th className="text-right py-3 px-4 font-semibold text-gray-700 text-xs">AMOUNT</th>
-                <th className="text-right py-3 px-4 font-semibold text-gray-700 text-xs">FINAL AMOUNT</th>
+                <th className="text-left py-3 px-4 print:py-2 print:px-2 font-semibold text-gray-700 text-xs print:text-[10px]">NO.</th>
+                <th className="text-left py-3 px-4 print:py-2 print:px-2 font-semibold text-gray-700 text-xs print:text-[10px]">ARTICLE</th>
+                <th className="text-left py-3 px-4 print:py-2 print:px-2 font-semibold text-gray-700 text-xs print:text-[10px]">QUANTITY</th>
+                <th className="text-left py-3 px-4 print:py-2 print:px-2 font-semibold text-gray-700 text-xs print:text-[10px]">UNIT PRICE</th>
+                <th className="text-left py-3 px-4 print:py-2 print:px-2 font-semibold text-gray-700 text-xs print:text-[10px]">VAT</th>
+                <th className="text-right py-3 px-4 print:py-2 print:px-2 font-semibold text-gray-700 text-xs print:text-[10px]">AMOUNT</th>
+                <th className="text-right py-3 px-4 print:py-2 print:px-2 font-semibold text-gray-700 text-xs print:text-[10px]">FINAL AMOUNT</th>
               </tr>
             </thead>
             <tbody>
@@ -48,24 +48,24 @@ export default function InvoiceLineItems({
                   
                   return (
                     <tr key={index} className="border-b border-gray-200">
-                      <td className="py-3 px-4 text-gray-600">{index + 1}</td>
-                      <td className="py-3 px-4">
-                        <p className="text-gray-900 font-medium text-sm">{article}</p>
-                        {desc && <p className="text-gray-500 text-xs">{desc}</p>}
+                      <td className="py-3 px-4 print:py-2 print:px-2 text-gray-600 text-sm print:text-[10px]">{index + 1}</td>
+                      <td className="py-3 px-4 print:py-2 print:px-2">
+                        <p className="text-gray-900 font-medium text-sm print:text-[10px]">{article}</p>
+                        {desc && <p className="text-gray-500 text-xs print:text-[9px]">{desc}</p>}
                       </td>
-                      <td className="py-3 px-4 text-gray-600 text-sm">
+                      <td className="py-3 px-4 print:py-2 print:px-2 text-gray-600 text-sm print:text-[10px]">
                         {item.qty || 0} Unit(s)
                       </td>
-                      <td className="py-3 px-4 text-gray-600 text-sm">
+                      <td className="py-3 px-4 print:py-2 print:px-2 text-gray-600 text-sm print:text-[10px]">
                         {formatCurrency(item.rate || 0, invoice.currency)}
                       </td>
-                      <td className="py-3 px-4 text-gray-600 text-sm">
+                      <td className="py-3 px-4 print:py-2 print:px-2 text-gray-600 text-sm print:text-[10px]">
                         {item.tax ? `${item.tax}%` : "0%"}
                       </td>
-                      <td className="py-3 px-4 text-right text-gray-600 text-sm">
+                      <td className="py-3 px-4 print:py-2 print:px-2 text-right text-gray-600 text-sm print:text-[10px]">
                         {formatCurrency(item.amount || 0, invoice.currency)}
                       </td>
-                      <td className="py-3 px-4 text-right text-gray-900 font-medium text-sm">
+                      <td className="py-3 px-4 print:py-2 print:px-2 text-right text-gray-900 font-medium text-sm print:text-[10px]">
                         {formatCurrency(item.amount || 0, invoice.currency)}
                       </td>
                     </tr>

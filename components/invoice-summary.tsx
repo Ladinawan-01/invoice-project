@@ -1,6 +1,7 @@
 "use client"
 
-import { ChevronDown, Send, Clock } from "lucide-react"
+import { ChevronDown, Send, Clock, Download } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 type Invoice = {
   id: string
@@ -20,6 +21,8 @@ export default function InvoiceSummary({
   formatCurrency: (amount: number, currency: string) => string
   formatDate: (dateString?: string) => string
 }) {
+  const router = useRouter()
+
   // Calculate if invoice is late
   const isLate = () => {
     if (!invoice.dueDate) return false
@@ -39,6 +42,20 @@ export default function InvoiceSummary({
   const totalPaid = paymentHistory.reduce((sum, payment) => sum + payment.amount, 0)
   const remainingAmount = (invoice.total || 0) - totalPaid
 
+  // Handle invoice download
+  const handleDownload = () => {
+    // Open invoice in a new window for printing/downloading as PDF
+    const printWindow = window.open(`/invoices/${invoice.id}/print`, '_blank')
+    if (printWindow) {
+      printWindow.onload = () => {
+        // Wait a bit for the page to load, then trigger print dialog
+        setTimeout(() => {
+          printWindow.print()
+        }, 500)
+      }
+    }
+  }
+
   return (
     <div className="space-y-4">
       {/* Status Badge */}
@@ -51,12 +68,15 @@ export default function InvoiceSummary({
 
       {/* Status Card */}
       <div className="bg-white rounded-lg shadow-sm p-4 flex flex-col items-center">
-        <p className="text-gray-800 font-medium text-sm mb-4 text-center">
-          Invoice not yet sent!
+        <p className="text-black-500 text-xs mb-4 text-center">
+          Download Invoice to share with customer.
         </p>
-        <button className="w-full bg-teal-500 hover:bg-teal-600 text-white font-medium text-xs rounded py-2 flex items-center justify-center gap-1.5 transition">
-          <Send size={14} className="text-white" />
-          Send Invoice
+        <button 
+          onClick={handleDownload}
+          className="w-full bg-teal-500 hover:bg-teal-600 text-white font-medium text-xs rounded py-2 flex items-center justify-center gap-1.5 transition"
+        >
+          <Download size={14} className="text-white" />
+          Download Invoice
         </button>
       </div>
 
