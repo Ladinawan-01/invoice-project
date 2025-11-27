@@ -77,14 +77,7 @@ export default function DashboardPage() {
       change: "+15%",
       trend: "up",
     },
-    {
-      title: "Pending Invoices",
-      value: stats.pendingInvoices,
-      icon: TrendingUp,
-      color: "bg-orange-500",
-      change: "-5%",
-      trend: "down",
-    },
+     
   ]
 
   return (
@@ -95,7 +88,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 mb-6">
         {statCards.map((stat, index) => {
           const Icon = stat.icon
           return (

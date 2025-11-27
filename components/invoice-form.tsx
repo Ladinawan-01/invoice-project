@@ -29,7 +29,24 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator"
 import { Switch } from "@/components/ui/switch"
 import { toast } from "sonner"
-import { Loader2, Plus, Trash2 } from "lucide-react"
+import { Loader2, Plus, Trash2, Pencil, Check, Settings2, HelpCircle } from "lucide-react"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 
 const lineItemSchema = z.object({
   name: z.string().min(1, "Item name is required"),
@@ -92,6 +109,16 @@ export default function InvoiceForm({ invoiceId, onSuccess }: InvoiceFormProps =
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [isAddressDialogOpen, setIsAddressDialogOpen] = useState(false)
+  const [addressDialogType, setAddressDialogType] = useState<"billTo" | "shipTo">("billTo")
+  const [addressFormData, setAddressFormData] = useState({
+    street: "",
+    city: "",
+    state: "",
+    zipCode: "",
+    country: "",
+    isShipping: false,
+  })
   const isEditMode = !!invoiceId
 
   const form = useForm<InvoiceFormValues>({
@@ -353,10 +380,35 @@ export default function InvoiceForm({ invoiceId, onSuccess }: InvoiceFormProps =
             <section className="grid grid-cols-1 gap-6 lg:grid-cols-2">
               <Card className="border border-gray-100 shadow-sm">
                 <CardHeader className="pb-2">
-                  <div className="flex flex-col gap-1">
-                    <p className="text-xs font-semibold uppercase tracking-widest text-teal-500">Customer</p>
-                    <CardTitle className="text-base">Bill To</CardTitle>
-                    <CardDescription>Billing information</CardDescription>
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex flex-col gap-1">
+                      <p className="text-xs font-semibold uppercase tracking-widest text-teal-500">Customer</p>
+                      <div className="flex items-center gap-2">
+                        <CardTitle className="text-base">Bill To</CardTitle>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6 text-gray-500 hover:text-teal-600"
+                          onClick={() => {
+                            // Load current form values into dialog
+                            setAddressFormData({
+                              street: form.getValues("billToAddress") || "",
+                              city: form.getValues("billToCity") || "",
+                              state: form.getValues("billToState") || "",
+                              zipCode: "",
+                              country: form.getValues("billToCountry") || "",
+                              isShipping: false,
+                            })
+                            setAddressDialogType("billTo")
+                            setIsAddressDialogOpen(true)
+                          }}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      <CardDescription>Billing information</CardDescription>
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -393,7 +445,7 @@ export default function InvoiceForm({ invoiceId, onSuccess }: InvoiceFormProps =
                       <FormItem>
                         <FormLabel>Address</FormLabel>
                         <FormControl>
-                          <Input placeholder="Street, number" {...field} />
+                          <Textarea placeholder="Street, number" className="min-h-[80px]" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -445,8 +497,35 @@ export default function InvoiceForm({ invoiceId, onSuccess }: InvoiceFormProps =
 
               <Card className="border border-gray-100 shadow-sm">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-base">Ship To</CardTitle>
-                  <CardDescription>Optional shipping address</CardDescription>
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex flex-col gap-1">
+                      <div className="flex items-center gap-2">
+                        <CardTitle className="text-base">Ship To</CardTitle>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6 text-gray-500 hover:text-teal-600"
+                          onClick={() => {
+                            // Load current form values into dialog
+                            setAddressFormData({
+                              street: form.getValues("shipToAddress") || "",
+                              city: form.getValues("shipToCity") || "",
+                              state: form.getValues("shipToState") || "",
+                              zipCode: "",
+                              country: form.getValues("shipToCountry") || "",
+                              isShipping: false,
+                            })
+                            setAddressDialogType("shipTo")
+                            setIsAddressDialogOpen(true)
+                          }}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      <CardDescription>Optional shipping address</CardDescription>
+                    </div>
+                  </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <FormField
@@ -469,7 +548,7 @@ export default function InvoiceForm({ invoiceId, onSuccess }: InvoiceFormProps =
                       <FormItem>
                         <FormLabel>Address</FormLabel>
                         <FormControl>
-                          <Input placeholder="Street, number" {...field} />
+                          <Textarea placeholder="Street, number" className="min-h-[80px]" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -740,28 +819,6 @@ export default function InvoiceForm({ invoiceId, onSuccess }: InvoiceFormProps =
                       </FormItem>
                     )}
                   />
-                  <FormField
-                    control={form.control}
-                    name="quantityDisplay"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Show quantity as</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="qty">Qty</SelectItem>
-                            <SelectItem value="hours">Hours</SelectItem>
-                            <SelectItem value="qty_hours">Qty / Hours</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
                 </CardContent>
               </Card>
             </section>
@@ -775,213 +832,290 @@ export default function InvoiceForm({ invoiceId, onSuccess }: InvoiceFormProps =
                   <p className="text-xs font-semibold uppercase tracking-widest text-teal-500">Items</p>
                   <h3 className="text-xl font-semibold text-gray-900">Invoice Line Items</h3>
                 </div>
-                <Button type="button" onClick={handleAddLineItem} className="bg-teal-600 hover:bg-teal-700 text-white">
-                  <Plus className="size-4 mr-2" />
+              </div>
+              
+              {/* Top Controls */}
+              <div className="flex items-center gap-4 flex-wrap">
+                <Button 
+                  type="button" 
+                  onClick={handleAddLineItem} 
+                  variant="outline"
+                  className="gap-2"
+                >
+                  <Plus className="size-4" />
                   Add Item
                 </Button>
+                
+                <Select>
+                  <SelectTrigger className="w-[140px]">
+                    <SelectValue placeholder="Bill Tasks" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="tasks">Bill Tasks</SelectItem>
+                  </SelectContent>
+                </Select>
+                
+                <div className="flex items-center gap-3 ml-auto">
+                  <span className="text-sm text-gray-600">Show quantity as:</span>
+                  <FormField
+                    control={form.control}
+                    name="quantityDisplay"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <RadioGroup
+                            value={field.value}
+                            onValueChange={field.onChange}
+                            className="flex items-center gap-4"
+                          >
+                            <div className="flex items-center gap-2">
+                              <RadioGroupItem value="qty" id="qty" />
+                              <label htmlFor="qty" className="text-sm cursor-pointer">Qty</label>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <RadioGroupItem value="hours" id="hours" />
+                              <label htmlFor="hours" className="text-sm cursor-pointer">Hours</label>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <RadioGroupItem value="qty_hours" id="qty_hours" />
+                              <label htmlFor="qty_hours" className="text-sm cursor-pointer">Qty/Hours</label>
+                            </div>
+                          </RadioGroup>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
-              <div className="space-y-4">
-                {fields.map((field, index) => (
-                  <Card key={field.id} className="border border-gray-100 shadow-sm">
-                    <CardContent className="space-y-4 pt-6">
-                      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                        <FormField
-                          control={form.control}
-                          name={`lineItems.${index}.name`}
-                          render={({ field }) => (
-                            <FormItem className="md:flex-1">
-                              <FormLabel>Item *</FormLabel>
-                              <FormControl>
-                                <Input placeholder="Item name" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        {fields.length > 1 && (
-                          <Button variant="ghost" type="button" className="text-red-500" onClick={() => remove(index)}>
-                            <Trash2 className="size-4 mr-2" />
-                            Remove
-                          </Button>
-                        )}
-                      </div>
-                      <FormField
-                        control={form.control}
-                        name={`lineItems.${index}.description`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Description</FormLabel>
-                            <FormControl>
-                              <Textarea placeholder="Item description" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <div className="grid grid-cols-1 gap-4 md:grid-cols-6">
-                        <FormField
-                          control={form.control}
-                          name={`lineItems.${index}.quantity`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Qty</FormLabel>
-                              <FormControl>
-                                <Input 
-                                  type="number" 
-                                  step="0.01" 
-                                  min="0.01"
-                                  {...field}
-                                  value={field.value ?? ""}
-                                  onChange={(e) => {
-                                    const value = e.target.value === "" ? "" : Number(e.target.value)
-                                    field.onChange(value)
-                                  }}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name={`lineItems.${index}.unit`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Unit</FormLabel>
-                              <FormControl>
-                                <Input placeholder="Unit" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name={`lineItems.${index}.rate`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Rate</FormLabel>
-                              <FormControl>
-                                <Input 
-                                  type="number" 
-                                  step="0.01" 
-                                  min="0"
-                                  {...field}
-                                  value={field.value ?? ""}
-                                  onChange={(e) => {
-                                    const value = e.target.value === "" ? "" : Number(e.target.value)
-                                    field.onChange(value)
-                                  }}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name={`lineItems.${index}.taxRate`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Tax</FormLabel>
-                              <Select
-                                onValueChange={(value) => field.onChange(Number(value))}
-                                value={String(field.value)}
-                              >
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Tax" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  {TAX_OPTIONS.map((option) => (
-                                    <SelectItem key={option.value} value={String(option.value)}>
-                                      {option.label}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <div className="md:col-span-2">
-                          <p className="text-xs uppercase text-gray-500">Amount</p>
-                          <p className="text-lg font-semibold text-gray-900">
-                            {(() => {
-                              const item = watchedLineItems?.[index]
-                              if (!item) return "$0.00"
-                              const qty = Number(item.quantity) || 0
-                              const rate = Number(item.rate) || 0
-                              const amount = qty * rate
-                              return amount.toLocaleString(undefined, {
+
+              {/* Line Items Table */}
+              <div className="border border-gray-200 rounded-lg overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-gray-50">
+                      <TableHead className="w-[200px]">Item</TableHead>
+                      <TableHead className="min-w-[250px]">Description</TableHead>
+                      <TableHead className="w-[120px]">
+                        <div className="flex items-center gap-1">
+                          Qty
+                          <span className="text-xs text-gray-500">({form.watch("quantityDisplay") === "qty" ? "Unit" : form.watch("quantityDisplay") === "hours" ? "Hours" : "Unit/Hours"})</span>
+                        </div>
+                      </TableHead>
+                      <TableHead className="w-[120px]">Rate</TableHead>
+                      <TableHead className="w-[120px]">Tax</TableHead>
+                      <TableHead className="w-[120px]">Amount</TableHead>
+                      <TableHead className="w-[60px]">
+                        <Settings2 className="size-4 text-gray-400" />
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {fields.map((field, index) => {
+                      const item = watchedLineItems?.[index]
+                      const amount = (Number(item?.quantity) || 0) * (Number(item?.rate) || 0)
+                      return (
+                        <TableRow key={field.id} className="hover:bg-gray-50">
+                          <TableCell>
+                            <FormField
+                              control={form.control}
+                              name={`lineItems.${index}.name`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormControl>
+                                    <Input 
+                                      placeholder="Description" 
+                                      {...field}
+                                      className="border-none shadow-none h-9"
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <FormField
+                              control={form.control}
+                              name={`lineItems.${index}.description`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormControl>
+                                    <Textarea 
+                                      placeholder="Long description" 
+                                      {...field}
+                                      className="border-none shadow-none min-h-[60px] resize-y"
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <div className="space-y-1">
+                              <FormField
+                                control={form.control}
+                                name={`lineItems.${index}.quantity`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormControl>
+                                      <Input 
+                                        type="number" 
+                                        step="0.01" 
+                                        min="0.01"
+                                        {...field}
+                                        value={field.value ?? ""}
+                                        onChange={(e) => {
+                                          const value = e.target.value === "" ? "" : Number(e.target.value)
+                                          field.onChange(value)
+                                        }}
+                                        className="border-none shadow-none h-9"
+                                        placeholder="1"
+                                      />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              <FormField
+                                control={form.control}
+                                name={`lineItems.${index}.unit`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormControl>
+                                      <Input 
+                                        placeholder="Unit" 
+                                        {...field}
+                                        className="border-none shadow-none h-7 text-xs"
+                                      />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <FormField
+                              control={form.control}
+                              name={`lineItems.${index}.rate`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormControl>
+                                    <Input 
+                                      type="number" 
+                                      step="0.01" 
+                                      min="0"
+                                      {...field}
+                                      value={field.value ?? ""}
+                                      onChange={(e) => {
+                                        const value = e.target.value === "" ? "" : Number(e.target.value)
+                                        field.onChange(value)
+                                      }}
+                                      className="border-none shadow-none h-9"
+                                      placeholder="Rate"
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <FormField
+                              control={form.control}
+                              name={`lineItems.${index}.taxRate`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <Select
+                                    onValueChange={(value) => field.onChange(Number(value))}
+                                    value={String(field.value)}
+                                  >
+                                    <FormControl>
+                                      <SelectTrigger className="border-none shadow-none h-9">
+                                        <SelectValue placeholder="No Tax" />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                      {TAX_OPTIONS.map((option) => (
+                                        <SelectItem key={option.value} value={String(option.value)}>
+                                          {option.label}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <div className="text-sm font-medium">
+                              {amount.toLocaleString(undefined, {
                                 style: "currency",
                                 currency: form.watch("currency") || "USD",
-                              })
-                            })()}
-                          </p>
-                        </div>
-                      </div>
-                      <FormField
-                        control={form.control}
-                        name={`lineItems.${index}.optional`}
-                        render={({ field }) => (
-                          <FormItem className="flex items-center gap-2">
-                            <FormControl>
-                              <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-                            </FormControl>
-                            <FormLabel className="text-sm font-normal text-gray-600">
-                              This item is optional
-                            </FormLabel>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </CardContent>
-                  </Card>
-                ))}
+                              })}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              {fields.length > 1 && (
+                                <Button 
+                                  variant="ghost" 
+                                  type="button" 
+                                  size="icon"
+                                  className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50"
+                                  onClick={() => remove(index)}
+                                >
+                                  <Trash2 className="size-4" />
+                                </Button>
+                              )}
+                              <Button 
+                                variant="ghost" 
+                                type="button" 
+                                size="icon"
+                                className="h-8 w-8 bg-teal-600 text-white hover:bg-teal-700"
+                              >
+                                <Check className="size-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      )
+                    })}
+                  </TableBody>
+                </Table>
+                {fields.length === 0 && (
+                  <div className="text-center py-8 text-gray-500 text-sm">
+                    No items added. Click "Add Item" to add line items.
+                  </div>
+                )}
               </div>
+              
+              {/* Optional checkbox for all items */}
+              {fields.length > 0 && (
+                <div className="flex items-center gap-2">
+                  <Checkbox 
+                    checked={fields.every((_, idx) => form.watch(`lineItems.${idx}.optional`))}
+                    onCheckedChange={(checked) => {
+                      fields.forEach((_, idx) => {
+                        form.setValue(`lineItems.${idx}.optional`, !!checked)
+                      })
+                    }}
+                  />
+                  <label className="text-sm text-gray-600 cursor-pointer">
+                    Mark all items as optional
+                  </label>
+                </div>
+              )}
             </section>
 
             <Separator />
 
             {/* Totals */}
             <section className="grid gap-6 lg:grid-cols-[3fr,2fr]">
-              <Card className="border border-gray-100 shadow-sm">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-base">Notes</CardTitle>
-                  <CardDescription>Visible to the client</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="clientNote"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Client Note</FormLabel>
-                        <FormControl>
-                          <Textarea placeholder="Add a note visible to the client" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="terms"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Terms & Conditions</FormLabel>
-                        <FormControl>
-                          <Textarea placeholder="Add terms for this invoice" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </CardContent>
-              </Card>
-              <Card className="border border-gray-100 shadow-sm">
+            <Card className="border border-gray-100 shadow-sm">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-base">Summary</CardTitle>
                   <CardDescription>Automatic totals</CardDescription>
@@ -1042,6 +1176,37 @@ export default function InvoiceForm({ invoiceId, onSuccess }: InvoiceFormProps =
                   </div>
                 </CardContent>
               </Card>
+              <Card className="border border-gray-100 shadow-sm">
+                <CardContent className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="clientNote"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Client Note</FormLabel>
+                        <FormControl>
+                          <Textarea placeholder="Add a note visible to the client" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="terms"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Terms & Conditions</FormLabel>
+                        <FormControl>
+                          <Textarea placeholder="Add terms for this invoice" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+              </Card>
+             
             </section>
 
             <div className="flex items-center justify-end gap-3">
@@ -1062,6 +1227,165 @@ export default function InvoiceForm({ invoiceId, onSuccess }: InvoiceFormProps =
           </form>
         </Form>
       </CardContent>
+      
+      {/* Address Dialog */}
+      <Dialog open={isAddressDialogOpen} onOpenChange={setIsAddressDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Street</DialogTitle>
+            <DialogDescription>
+              {addressDialogType === "billTo" 
+                ? "Enter the billing address details" 
+                : "Enter the shipping address details"}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label htmlFor="street" className="text-sm font-medium">
+                Street
+              </label>
+              <Textarea
+                id="street"
+                placeholder="Enter street address"
+                value={addressFormData.street}
+                onChange={(e) =>
+                  setAddressFormData({ ...addressFormData, street: e.target.value })
+                }
+                className="min-h-[100px] resize-y"
+              />
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="city" className="text-sm font-medium">
+                City
+              </label>
+              <Input
+                id="city"
+                placeholder="Enter city"
+                value={addressFormData.city}
+                onChange={(e) =>
+                  setAddressFormData({ ...addressFormData, city: e.target.value })
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="state" className="text-sm font-medium">
+                State
+              </label>
+              <Input
+                id="state"
+                placeholder="Enter state"
+                value={addressFormData.state}
+                onChange={(e) =>
+                  setAddressFormData({ ...addressFormData, state: e.target.value })
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="zipCode" className="text-sm font-medium">
+                Zip Code
+              </label>
+              <Input
+                id="zipCode"
+                placeholder="Enter zip code"
+                value={addressFormData.zipCode}
+                onChange={(e) =>
+                  setAddressFormData({ ...addressFormData, zipCode: e.target.value })
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="country" className="text-sm font-medium">
+                Country
+              </label>
+              <Select
+                value={addressFormData.country}
+                onValueChange={(value) =>
+                  setAddressFormData({ ...addressFormData, country: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Nothing selected" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="US">United States</SelectItem>
+                  <SelectItem value="GB">United Kingdom</SelectItem>
+                  <SelectItem value="CA">Canada</SelectItem>
+                  <SelectItem value="AU">Australia</SelectItem>
+                  <SelectItem value="IN">India</SelectItem>
+                  <SelectItem value="DE">Germany</SelectItem>
+                  <SelectItem value="FR">France</SelectItem>
+                  <SelectItem value="IT">Italy</SelectItem>
+                  <SelectItem value="ES">Spain</SelectItem>
+                  <SelectItem value="BR">Brazil</SelectItem>
+                  <SelectItem value="MX">Mexico</SelectItem>
+                  <SelectItem value="JP">Japan</SelectItem>
+                  <SelectItem value="CN">China</SelectItem>
+                  <SelectItem value="KR">South Korea</SelectItem>
+                  <SelectItem value="SG">Singapore</SelectItem>
+                  <SelectItem value="AE">United Arab Emirates</SelectItem>
+                  <SelectItem value="SA">Saudi Arabia</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center space-x-2 pt-2">
+              <Checkbox
+                id="shippingAddress"
+                checked={addressFormData.isShipping}
+                onCheckedChange={(checked) =>
+                  setAddressFormData({ ...addressFormData, isShipping: !!checked })
+                }
+              />
+              <label
+                htmlFor="shippingAddress"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                Shipping Address
+              </label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsAddressDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              className="bg-teal-600 text-white hover:bg-teal-700"
+              onClick={() => {
+                if (addressDialogType === "billTo") {
+                  // Apply address to Bill To form fields
+                  form.setValue("billToAddress", addressFormData.street)
+                  form.setValue("billToCity", addressFormData.city)
+                  form.setValue("billToState", addressFormData.state)
+                  form.setValue("billToCountry", addressFormData.country)
+
+                  // If shipping address is checked, also populate ship to fields
+                  if (addressFormData.isShipping) {
+                    form.setValue("shipToAddress", addressFormData.street)
+                    form.setValue("shipToCity", addressFormData.city)
+                    form.setValue("shipToState", addressFormData.state)
+                    form.setValue("shipToCountry", addressFormData.country)
+                  }
+                } else {
+                  // Apply address to Ship To form fields
+                  form.setValue("shipToAddress", addressFormData.street)
+                  form.setValue("shipToCity", addressFormData.city)
+                  form.setValue("shipToState", addressFormData.state)
+                  form.setValue("shipToCountry", addressFormData.country)
+                }
+
+                setIsAddressDialogOpen(false)
+                toast.success("Address updated successfully")
+              }}
+            >
+              Apply
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   )
 }
