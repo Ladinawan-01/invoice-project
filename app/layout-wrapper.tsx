@@ -29,7 +29,7 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
   } 
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex h-screen bg-gray-50 overflow-hidden">
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       {/* Overlay for mobile when sidebar is open */}
       {sidebarOpen && (
@@ -38,7 +38,7 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
           onClick={() => setSidebarOpen(false)}
         />
       )}
-      <main className={`flex-1 overflow-y-auto bg-gray-100 h-screen transition-all duration-300 ease-in-out ${
+      <main className={`flex-1 overflow-y-auto bg-gray-100 h-full transition-all duration-300 ease-in-out ${
         sidebarOpen ? "lg:ml-64 ml-0" : "ml-0"
       }`}>
         <InvoiceHeader onMenuClick={toggleSidebar} sidebarOpen={sidebarOpen} />

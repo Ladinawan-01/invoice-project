@@ -221,19 +221,50 @@ export default function InvoiceForm({ invoiceId, onSuccess }: InvoiceFormProps =
   }, [invoiceId, form])
 
   const totals = useMemo(() => {
-    const subtotal = watchedLineItems?.reduce((acc, item) => acc + item.quantity * item.rate, 0) ?? 0
+    if (!watchedLineItems || watchedLineItems.length === 0) {
+      return {
+        subtotal: 0,
+        discountAmount: 0,
+        taxAmount: 0,
+        grandTotal: 0,
+      }
+    }
+
+    // Calculate subtotal: sum of all line items (quantity * rate)
+    const subtotal = watchedLineItems.reduce((acc, item) => {
+      const qty = Number(item.quantity) || 0
+      const rate = Number(item.rate) || 0
+      return acc + (qty * rate)
+    }, 0)
+
+    // Calculate discount
     const discountAmount =
-      discountType === "percent" ? (subtotal * (discountValue ?? 0)) / 100 : discountValue ?? 0
-    const taxableAmount = subtotal - discountAmount
-    const taxAmount =
-      watchedLineItems?.reduce((acc, item) => acc + (item.quantity * item.rate * item.taxRate) / 100, 0) ?? 0
-    const grandTotal = taxableAmount + taxAmount + (adjustment ?? 0)
+      discountType === "percent" 
+        ? (subtotal * (Number(discountValue) || 0)) / 100 
+        : Number(discountValue) || 0
+
+    // Calculate taxable amount (after discount)
+    const taxableAmount = Math.max(0, subtotal - discountAmount)
+
+    // Calculate tax: sum of tax on each line item (applied on item subtotal before overall discount)
+    // Note: Tax is calculated per item, not on the discounted total
+    const taxAmount = watchedLineItems.reduce((acc, item) => {
+      const qty = Number(item.quantity) || 0
+      const rate = Number(item.rate) || 0
+      const taxRate = Number(item.taxRate) || 0
+      const itemSubtotal = qty * rate
+      return acc + (itemSubtotal * taxRate) / 100
+    }, 0)
+
+    // Calculate grand total: taxable amount + tax + adjustment
+    const adjustmentValue = Number(adjustment) || 0
+    const grandTotal = taxableAmount + taxAmount + adjustmentValue
 
     return {
-      subtotal,
-      discountAmount,
-      taxAmount,
-      grandTotal,
+      subtotal: Math.round(subtotal * 100) / 100,
+      discountAmount: Math.round(discountAmount * 100) / 100,
+      taxAmount: Math.round(taxAmount * 100) / 100,
+      grandTotal: Math.round(grandTotal * 100) / 100,
     }
   }, [watchedLineItems, discountType, discountValue, adjustment])
 
@@ -319,163 +350,174 @@ export default function InvoiceForm({ invoiceId, onSuccess }: InvoiceFormProps =
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             {/* Customer Section */}
-            <section className="space-y-4">
-              <div className="flex flex-col gap-2">
-                <p className="text-xs font-semibold uppercase tracking-widest text-teal-500">Customer</p>
-                <h3 className="text-xl font-semibold text-gray-900">Bill To</h3>
-              </div>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <FormField
-                  control={form.control}
-                  name="customerName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Customer *</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Select customer" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="customerEmail"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input placeholder="customer@email.com" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="billToAddress"
-                  render={({ field }) => (
-                    <FormItem className="md:col-span-2">
-                      <FormLabel>Address</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Street, number" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="billToCity"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>City</FormLabel>
-                      <FormControl>
-                        <Input placeholder="City" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="billToState"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>State</FormLabel>
-                      <FormControl>
-                        <Input placeholder="State" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="billToCountry"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Country</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Country" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <Separator />
-              <div className="flex flex-col gap-2">
-                <h3 className="text-xl font-semibold text-gray-900">Ship To</h3>
-                <p className="text-sm text-gray-600">Optional shipping address</p>
-              </div>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <FormField
-                  control={form.control}
-                  name="shipToName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Contact Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Contact name" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="shipToAddress"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Address</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Street, number" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="shipToCity"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>City</FormLabel>
-                      <FormControl>
-                        <Input placeholder="City" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="shipToState"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>State</FormLabel>
-                      <FormControl>
-                        <Input placeholder="State" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="shipToCountry"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Country</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Country" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+            <section className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+              <Card className="border border-gray-100 shadow-sm">
+                <CardHeader className="pb-2">
+                  <div className="flex flex-col gap-1">
+                    <p className="text-xs font-semibold uppercase tracking-widest text-teal-500">Customer</p>
+                    <CardTitle className="text-base">Bill To</CardTitle>
+                    <CardDescription>Billing information</CardDescription>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="customerName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Customer *</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Select customer" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="customerEmail"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input placeholder="customer@email.com" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="billToAddress"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Address</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Street, number" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <FormField
+                      control={form.control}
+                      name="billToCity"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>City</FormLabel>
+                          <FormControl>
+                            <Input placeholder="City" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="billToState"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>State</FormLabel>
+                          <FormControl>
+                            <Input placeholder="State" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <FormField
+                    control={form.control}
+                    name="billToCountry"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Country</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Country" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+              </Card>
+
+              <Card className="border border-gray-100 shadow-sm">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base">Ship To</CardTitle>
+                  <CardDescription>Optional shipping address</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="shipToName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Contact Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Contact name" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="shipToAddress"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Address</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Street, number" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <FormField
+                      control={form.control}
+                      name="shipToCity"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>City</FormLabel>
+                          <FormControl>
+                            <Input placeholder="City" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="shipToState"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>State</FormLabel>
+                          <FormControl>
+                            <Input placeholder="State" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <FormField
+                    control={form.control}
+                    name="shipToCountry"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Country</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Country" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+              </Card>
             </section>
 
             <Separator />
@@ -784,7 +826,17 @@ export default function InvoiceForm({ invoiceId, onSuccess }: InvoiceFormProps =
                             <FormItem>
                               <FormLabel>Qty</FormLabel>
                               <FormControl>
-                                <Input type="number" step="0.01" {...field} />
+                                <Input 
+                                  type="number" 
+                                  step="0.01" 
+                                  min="0.01"
+                                  {...field}
+                                  value={field.value ?? ""}
+                                  onChange={(e) => {
+                                    const value = e.target.value === "" ? "" : Number(e.target.value)
+                                    field.onChange(value)
+                                  }}
+                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -810,7 +862,17 @@ export default function InvoiceForm({ invoiceId, onSuccess }: InvoiceFormProps =
                             <FormItem>
                               <FormLabel>Rate</FormLabel>
                               <FormControl>
-                                <Input type="number" step="0.01" {...field} />
+                                <Input 
+                                  type="number" 
+                                  step="0.01" 
+                                  min="0"
+                                  {...field}
+                                  value={field.value ?? ""}
+                                  onChange={(e) => {
+                                    const value = e.target.value === "" ? "" : Number(e.target.value)
+                                    field.onChange(value)
+                                  }}
+                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -846,10 +908,17 @@ export default function InvoiceForm({ invoiceId, onSuccess }: InvoiceFormProps =
                         <div className="md:col-span-2">
                           <p className="text-xs uppercase text-gray-500">Amount</p>
                           <p className="text-lg font-semibold text-gray-900">
-                            {(field.quantity * field.rate).toLocaleString(undefined, {
-                              style: "currency",
-                              currency: form.watch("currency"),
-                            })}
+                            {(() => {
+                              const item = watchedLineItems?.[index]
+                              if (!item) return "$0.00"
+                              const qty = Number(item.quantity) || 0
+                              const rate = Number(item.rate) || 0
+                              const amount = qty * rate
+                              return amount.toLocaleString(undefined, {
+                                style: "currency",
+                                currency: form.watch("currency") || "USD",
+                              })
+                            })()}
                           </p>
                         </div>
                       </div>
